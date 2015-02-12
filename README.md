@@ -1,6 +1,6 @@
 # Test-Sandbox-Compose: Fast Development Environments Using Test-Sandbox
 
-[![Hackage version](https://img.shields.io/hackage/v/test-sandbox-compose.svg?style=flat)](https://hackage.haskell.org/package/test-sandbox-compose)  [![Build Status](https://travis-ci.org/junjihashimoto/test-sandbox-compose.png?branch=master)](https://travis-ci.org/junjihashimoto/test-sandbox-compose) [![Coverage Status](https://coveralls.io/repos/junjihashimoto/test-sandbox-compose/badge.png)](https://coveralls.io/r/junjihashimoto/test-sandbox-compose)
+[![Hackage version](https://img.shields.io/hackage/v/test-sandbox-compose.svg?style=flat)](https://hackage.haskell.org/package/test-sandbox-compose)  [![Build Status](https://travis-ci.org/junjihashimoto/test-sandbox-compose.png?branch=master)](https://travis-ci.org/junjihashimoto/test-sandbox-compose)
 
 Test-Sandbox-Compose makes development environments for multi-servers using Test-Sandbox.
 Each server is defined in test-sandbox-compose.yml.

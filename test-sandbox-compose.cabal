@@ -34,13 +34,13 @@ library
                      , Test.Sandbox.Compose.Server
   -- other-modules:       
   -- other-extensions:    
-  build-depends:       base
+  build-depends:       base        >= 4 && < 5
                      , aeson
                      , containers
                      , hastache
                      , text
                      , containers
-                     , test-sandbox
+                     , test-sandbox >= 0.1
                      , yaml
                      , network
                      , yesod
@@ -64,7 +64,7 @@ executable test-sandbox-compose
   main-is: Main.hs            
   -- other-modules:       
   -- other-extensions:    
-  build-depends:       base
+  build-depends:       base        >= 4 && < 5
                      , test-sandbox-compose
                      , optparse-applicative
                      , aeson
@@ -97,30 +97,12 @@ test-suite test
     hs-source-dirs:    tests
     ghc-options:       -Wall
 
-    build-depends:     base
+    build-depends:     base        >= 4 && < 5
                      , hspec
                      , shakespeare
-                     , test-sandbox-compose
-                     , aeson
-                     , containers
-                     , hastache
                      , text
-                     , containers
-                     , test-sandbox
-                     , yaml
-                     , network
-                     , yesod
-                     , yesod-core
-                     , wai
-                     , wai-extra
                      , bytestring
-                     , warp
                      , process
-                     , lifted-base
-                     , directory
                      , unix
-                     , shelly
-                     , http-conduit
-                     , void
                      , cabal-test-bin >= 0.1.4
     Default-Language:   Haskell2010
