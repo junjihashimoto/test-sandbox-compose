@@ -1,0 +1,15 @@
+zookeeper:
+  cmd: '/usr/share/zookeeper/bin/zkServer.sh'
+  args:
+    - 'start-foreground'
+    - '{{zookeeper_conf_conf}}'
+  tempfiles: []
+  confs:
+    conf: |
+      dataDir={{zookeeper_dir_data}}
+      clientPort={{zookeeper_port_2181}}
+      maxClientCnxns=1000
+  dirs:
+    - 'data'
+  ports:
+    - '2181'
