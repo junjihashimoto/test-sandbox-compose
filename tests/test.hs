@@ -4,6 +4,8 @@
 
 import Test.Hspec
 import Text.Shakespeare.Text
+import Test.Sandbox
+import Test.Hspec.Sandbox
 
 import qualified Data.Text as T
 
@@ -12,9 +14,13 @@ import System.Process
 import System.Exit
 
 main :: IO ()
-main = do
+main = withSandbox $ \ref -> do
   bin <-  getExePath "." "test-sandbox-compose"
   hspec $ do
+    describe "run daemon" $ with ref $ do
+      it "run daemon" $ do
+        let args = ["daemon", "--conf", "sample/test-sandbox-compose.yml"]
+        register "daemon" bin args def >>= start
     describe "Server Test" $ do
       it "help" $ do
         (c,o,e) <- readProcessWithExitCode bin ["--help"] []
