@@ -29,7 +29,8 @@ type ConfContent = String
 type Services = M.Map ServiceName Service
 
 data Service = Service {
-  sCmd :: FilePath
+  sOrder :: Maybe Int
+, sCmd :: FilePath
 , sArgs :: [String]
 , sConfs :: Maybe (M.Map ConfName ConfContent)
 , sDirs :: Maybe [DirName]

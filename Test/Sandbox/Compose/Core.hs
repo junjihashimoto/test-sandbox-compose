@@ -14,6 +14,7 @@ import Test.Sandbox.Compose.Type
 import Test.Sandbox.Compose.Template
 import Test.Sandbox 
 import Test.Sandbox.Internals
+import Data.List
 import qualified Data.Yaml as Y
 import System.Process
 import System.Exit
@@ -73,7 +74,7 @@ setupServices services = do
 
 runServices :: Services -> Sandbox ()
 runServices services = do
-  forM_ (M.toList services) $ \(k,_) -> do
+  forM_ (sortBy (\a b -> compare (sOrder (snd a)) (sOrder (snd b))) (M.toList services)) $ \(k,_) -> do
     runService k services
 
 registerService :: ServiceName -> Service -> Sandbox ()
