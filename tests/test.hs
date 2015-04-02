@@ -19,7 +19,35 @@ main = withSandbox $ \ref -> do
   hspec $ do
     describe "run daemon" $ with ref $ do
       it "run daemon" $ do
-        let args = ["daemon", "--conf", "sample/test-sandbox-compose.yml"]
+        file <-  setFile "yaml" $ T.unpack
+                                [sbt|runhaskell:
+                                    |  cmd: 'runhaskell'
+                                    |  args:
+                                    |    - '{{runhaskell_conf_conf}}'
+                                    |  tempfiles: []
+                                    |  confs:
+                                    |    conf: |
+                                    |      import Network
+                                    |      import System.IO
+                                    |      import Control.Monad
+                                    |      import Control.Concurrent
+                                    |      
+                                    |      main :: IO ()
+                                    |      main = withSocketsDo $ do
+                                    |        let val = "hoge\n"
+                                    |        sock <- listenOn $ PortNumber {{runhaskell_port_2181}}
+                                    |        forever $ do
+                                    |          (handle, _host, _port) <- accept sock
+                                    |          forkFinally (talk handle val) (\_ -> hClose handle)
+                                    |        where
+                                    |          talk h val = do
+                                    |            hPutStr h val
+                                    |            v <-  hGetContents h
+                                    |            putStr v
+                                    |  ports:
+                                    |    - '2181'
+                                    |]
+        let args = ["daemon", "--conf", file]
         register "daemon" bin args def >>= start
     describe "Server Test" $ do
       it "help" $ do
