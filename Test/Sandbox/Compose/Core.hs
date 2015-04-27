@@ -102,10 +102,27 @@ runService serviceName services = do
         error $ "AfterScript Error:\n" ++ show r
     Nothing -> return ()
 
-killService :: ServiceName -> Sandbox ()
-killService k = stop k
+killService :: ServiceName -> Services -> Sandbox ()
+killService serviceName services = do
+  let k = serviceName
+  let v = services M.! serviceName
+  case sBeforeDestroy v of
+    Just script -> liftIO $ do
+      r@(c,_,_) <- readProcessWithExitCode "bash" ["-c",script] []
+      when (c /= ExitSuccess) $ do
+        putStrLn $ "BeforeDestroy Error:\n" ++ show r
+    Nothing -> return ()
+  stop k
+  case sAfterDestroy v of
+    Just script -> liftIO $ do
+      r@(c,_,_) <- readProcessWithExitCode "bash" ["-c",script] []
+      when (c /= ExitSuccess) $ do
+        putStrLn $ "AfterDestroy Error:\n" ++ show r
+    Nothing -> return ()
 
-killServices :: Sandbox ()
-killServices = do
-  stopAll
+killServices :: Services -> Sandbox ()
+killServices services = do
+  forM_ (reverse (sortBy (\a b -> compare (sOrder (snd a)) (sOrder (snd b))) (M.toList services))) $ \(k,_) -> do
+    killService k services
+--  stopAll
   cleanUpProcesses

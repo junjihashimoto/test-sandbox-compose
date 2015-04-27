@@ -1,3 +1,7 @@
+## 0.1.4
+
+* Add destroy script
+
 ## 0.1.3
 
 * Add lauching order directive for config file(yaml)

@@ -38,6 +38,8 @@ data Service = Service {
 , sPorts :: Maybe [PortName]
 , sBeforeScript :: Maybe String
 , sAfterScript :: Maybe String
+, sBeforeDestroy :: Maybe String
+, sAfterDestroy :: Maybe String
 } deriving (Show,Read,Eq)
 
 $(deriveJSON defaultOptions{fieldLabelModifier = drop 1.map toLower, constructorTagModifier = map toLower} ''Service)

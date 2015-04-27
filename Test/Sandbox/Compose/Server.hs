@@ -66,23 +66,25 @@ getStatusR serviceName = do
 getConfR :: HandlerT App IO RepPlain
 getConfR = do
   (App serv _sand) <- getYesod
-  sand' <- liftIO $ readIORef serv
-  return $ RepPlain $ toContent $ Y.encode $ sand'
+  services <- liftIO $ readIORef serv
+  return $ RepPlain $ toContent $ Y.encode $ services
   
 getKillAllR :: HandlerT App IO RepPlain
 getKillAllR = do
-  (App _ sand) <- getYesod
+  (App serv sand) <- getYesod
+  services <- liftIO $ readIORef serv
   result <- liftIO $ flip runSandbox sand $ do
-    killServices
+    killServices services
   case result of
     Right _ -> return  $ RepPlain "OK\n"
     Left err -> return $ RepPlain $ toContent $ err
 
 getKillR :: ServiceName -> HandlerT App IO RepPlain
 getKillR serviceName = do
-  (App _ sand) <- getYesod
+  (App serv sand) <- getYesod
+  services <- liftIO $ readIORef serv
   result <- liftIO $ flip runSandbox sand $ do
-    killService serviceName
+    killService serviceName services
   case result of
     Right _ -> return  $ RepPlain "OK\n"
     Left err -> return $ RepPlain $ toContent $ err
@@ -90,9 +92,10 @@ getKillR serviceName = do
 
 getDestroyR :: HandlerT App IO RepPlain
 getDestroyR = do
-  (App _ sand) <- getYesod
+  (App serv sand) <- getYesod
+  services <- liftIO $ readIORef serv
   _ <- liftIO $ flip runSandbox sand $ do
-    killServices
+    killServices services
   _ <- liftIO $ forkIO $ do
     threadDelay (1*1000*1000)
     shelly $ do
@@ -128,7 +131,7 @@ mkYesod "App" [parseRoutes|
 |]
 
 
-runServer' :: FilePath -> IO (App,Int)
+runServer' :: FilePath -> IO (App,(FilePath,Int))
 runServer' conf = do
   cdir <- getCurrentDirectory
   let dir=(cdir <> "/.sandbox")
@@ -138,7 +141,6 @@ runServer' conf = do
   state <- newSandboxState "compose" dir
   port <- runSandbox' state $ do
     getPort "test-sandbox-compose"
-  writeFile (dir <> "/port") $ show port
   eServ <- Y.decodeFileEither conf :: IO (Either Y.ParseException Services)
   case eServ of
     Left err -> do
@@ -153,17 +155,17 @@ runServer' conf = do
             print "setupServices is failed."
             exitWith $ ExitFailure 1
       services <- newIORef serv'
-      return (App services state,port)
+      return (App services state,(dir,port))
 
 runServer :: FilePath -> Bool -> IO ()
 runServer conf enbBackGround = do
-  (app,port) <- runServer' conf
+  (app,(dir,port)) <- runServer' conf
   let prog :: IO ()
       prog = toWaiApp app >>= run port
-  backGround enbBackGround prog
+  backGround enbBackGround prog (dir,port)
 
-backGround :: Bool -> IO () -> IO ()
-backGround exitP prog = do
+backGround :: Bool -> IO () -> (String,Int) -> IO ()
+backGround exitP prog (dir,port) = do
   _ <- forkProcess p
   when exitP $ do
     exitImmediately ExitSuccess
@@ -174,7 +176,9 @@ backGround exitP prog = do
       exitImmediately ExitSuccess
     p' = do
       switchDescriptors
-      prog
+      bracket (return (dir <> "/port")) removeFile $ \file -> do
+        writeFile file $ show port
+        prog
     switchDescriptors :: IO ()
     switchDescriptors = do
       null' <- openFd "/dev/null" ReadWrite Nothing defaultFileFlags
@@ -185,4 +189,3 @@ backGround exitP prog = do
       _ <- sendTo' out stdOutput
       _ <- sendTo' err stdError
       return ()
-

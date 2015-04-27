@@ -2,7 +2,7 @@
 --  documentation, see http://haskell.org/cabal/users-guide/
 
 name:                test-sandbox-compose
-version:             0.1.3
+version:             0.1.4
 synopsis:            Lightweight development enviroments using test-sandbox
 description:         
 license:             BSD3

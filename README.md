@@ -22,25 +22,39 @@ Install this from Hackage.
 ## test-sandbox-compose.yml reference
 
 ```
+# service name: one service basically mananges one command .
 <service-name1>:
+# command for service
   cmd: <command-name>
+# command arguments
   args:
     - <arg1>
     - <arg2>
+# configuration file with a content for command
   confs:
     <conf1>: <conf1 contents>
     <conf2>: <conf2 contents>
+# temporary file without a content for command
   tempfiles:
     - <temp1>
     - <temp2>
+# temporary directory
   dirs:
     - <dir1>
     - <dir2>
+# test-sandbox allocates temporary ports to prevent used ports.
   ports:
     - <port1>
     - <port2>
+# this script runs before above command runs.
   beforescript: <script content>
+# this script runs after above command is launched.
   afterscript: <script content>
+# this script runs before sending kill signal.
+  beforedestroy: <script content>
+# this script runs after sending kill signal.
+  afterdestroy: <script content>
+# second service name
 <service-name2>
   ...
 ```
