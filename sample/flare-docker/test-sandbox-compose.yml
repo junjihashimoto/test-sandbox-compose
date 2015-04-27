@@ -1,0 +1,7 @@
+flare:
+  cmd: docker
+  args:
+    - run
+    - junjih/flare-docker
+  afterdestroy: |
+    docker rm -f `cat .sandbox/swift_out.txt`

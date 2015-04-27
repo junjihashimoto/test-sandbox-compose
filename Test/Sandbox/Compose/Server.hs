@@ -32,23 +32,42 @@ default (T.Text)
 instance Yesod App where
   errorHandler e = liftIO (appendFile ".sandbox/log" (show e)) >> defaultErrorHandler e
 
+destroyServer :: HandlerT App IO ()
+destroyServer = do
+  (App serv sand) <- getYesod
+  services <- liftIO $ readIORef serv
+  _ <- liftIO $ flip runSandbox sand $ do
+    killServices services
+  _ <- liftIO $ forkIO $ do
+    threadDelay (1*1000*1000)
+    -- shelly $ do
+    --   rm ".sandbox/port" 
+    exitImmediately ExitSuccess
+  return ()
+
 getUpAllR :: HandlerT App IO RepPlain
 getUpAllR = do
   (App serv sand) <- getYesod
   result <- liftIO $ flip runSandbox sand $ do
-    runServices =<< readIORef serv
+    services <- readIORef serv
+    runServices services
   case result of
     Right _ -> return $ RepPlain "OK\n"
-    Left err -> return $ RepPlain $ toContent $ err
+    Left err -> do
+      destroyServer
+      return $ RepPlain $ toContent $ err
 
 getUpR :: ServiceName -> HandlerT App IO RepPlain
 getUpR serviceName = do
   (App serv sand) <- getYesod
   result <- liftIO $ flip runSandbox sand $ do
-    runService serviceName =<< readIORef serv
+    services <- readIORef serv
+    runService serviceName services
   case result of
     Right _ -> return $ RepPlain "OK\n"
-    Left err -> return $ RepPlain $ toContent $ err
+    Left err -> do
+      destroyServer
+      return $ RepPlain $ toContent $ err
 
 
 getStatusAllR :: HandlerT App IO RepPlain
@@ -92,15 +111,7 @@ getKillR serviceName = do
 
 getDestroyR :: HandlerT App IO RepPlain
 getDestroyR = do
-  (App serv sand) <- getYesod
-  services <- liftIO $ readIORef serv
-  _ <- liftIO $ flip runSandbox sand $ do
-    killServices services
-  _ <- liftIO $ forkIO $ do
-    threadDelay (1*1000*1000)
-    shelly $ do
-      rm ".sandbox/port" 
-    exitImmediately ExitSuccess
+  destroyServer
   return  $ RepPlain "OK\n"
 
 

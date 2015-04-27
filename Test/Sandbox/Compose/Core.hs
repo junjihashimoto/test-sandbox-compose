@@ -92,14 +92,14 @@ runService serviceName services = do
     Just script -> do
       r@(c,_,_) <- liftIO $ readProcessWithExitCode "bash" ["-c",script] []
       when (c /= ExitSuccess) $ do
-        error $ "BeforeScript Error:\n" ++ show r
+        fail $ "BeforeScript Error:\n" ++ show r
     Nothing -> return ()
   void $ start k
   case sAfterScript v of
     Just script -> do
       r@(c,_,_) <- liftIO $ readProcessWithExitCode "bash" ["-c",script] []
       when (c /= ExitSuccess) $ do
-        error $ "AfterScript Error:\n" ++ show r
+        fail $ "AfterScript Error:\n" ++ show r
     Nothing -> return ()
 
 killService :: ServiceName -> Services -> Sandbox ()
